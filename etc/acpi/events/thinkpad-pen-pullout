@@ -1,0 +1,2 @@
+event=LEN0068:00 00000080 0000500c
+action=/usr/bin/thinkpad-pen-pull

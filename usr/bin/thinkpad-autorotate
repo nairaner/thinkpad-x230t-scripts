@@ -1,0 +1,39 @@
+#!/bin/bash
+
+export DISPLAY=:0
+if [ `whoami` == root ] 
+then
+	user=`loginctl list-users | head -n -1 | egrep "[0-9].*" | awk '{print $2}' | grep -v root | head -n 1`
+	if [ $? -eq 0 ];
+	then
+		`su $user -c '/usr/bin/thinkpad-autorotate'`
+	fi
+	exit
+fi
+
+TABLET_MODE='cat /sys/devices/platform/thinkpad_acpi/hotkey_tablet_mode'
+
+ids=$(xinput --list | awk -v search="$SEARCH" \
+    '$0 ~ search {match($0, /id=[0-9]+/);\
+                  if (RSTART) \
+                    print substr($0, RSTART+3, RLENGTH-3)\
+                 }'\
+     )
+
+if [ `$TABLET_MODE` == 0 ]
+then
+	`xrandr --output LVDS-1 --rotate normal`
+	for i in $ids
+	do
+		`xinput set-prop $i "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 1`
+	done
+else
+	`xrandr --output LVDS-1 --rotate inverted`
+        for i in $ids
+        do 
+                `xinput set-prop $i "Coordinate Transformation Matrix" -1 0 1 0 -1 1 0 0 1`
+        done
+
+fi
+exit
+

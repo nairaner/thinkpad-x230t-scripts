@@ -1,0 +1,21 @@
+#!/bin/bash
+
+pidof xournalpp
+if [ $? -eq 0 ]; 
+then
+	exit
+fi
+
+export DISPLAY=:0
+if [ `whoami` == root ]
+then
+        user=`loginctl list-users | head -n -1 | egrep "[0-9].*" | awk '{print $2}' | grep -v root | head -n 1`
+        if [ $? -eq 0 ];
+        then
+                su $user -c /usr/bin/xournalpp &
+		disown %1
+        fi
+        exit
+fi
+
+
